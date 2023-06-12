@@ -1,0 +1,191 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+</head>
+
+<body class="hold-transition layout-top-nav layout-navbar-fixed">
+    <div class="wrapper">
+        {% include 'parts/header.html' %}
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>Current Tickets</h1>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.container-fluid -->
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+
+                    <div class="row">
+                        {% for ticket in tickets %}
+                        <div class="col-lg-4 col-md-6">
+                            <div class="card {% if ticket.criticality == 'URGENT' %} card-warning {% elif ticket.criticality == 'CRITICAL'%}card-danger {% else %}card-primary {% endif %} shadow-sm">
+                                <div class="card-header">
+                                    <h3 class="card-title">{{ticket.title}}</h3> <span style='margin-left:20px;'>Ticket Id #{{ticket.id}}</span>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                                    </div>
+                                    <!-- /.card-tools -->
+                                </div>
+                                <!-- /.card-header -->
+                                <div class="card-body">
+                                    <dl>
+                                        <dt>Description</dt>
+                                        <dd>{{ticket.description}}</dd>
+                                        <dt>Key People, Tool and Country</dt>
+                                        <dd><span class="badge bg-success" style='margin-right:5px;'>{{ticket.complaint_by}}</span><span class=" badge bg-success">{{ticket.currently_assigned}}</span></dd>
+                                        <dd><span class="badge bg-primary" style='margin-right:5px;'>{{ticket.country}}</span><span class=" badge bg-primary">{{ticket.tools}}</span></dd>
+                                    </dl>
+                                    <dl class='row'>
+                                        <dt class='col-sm-3'>URL</dt>
+                                        <dd class='col-sm-9'>{{ticket.url}}
+                                            <dd>
+                                    </dl>
+                                    <dl class='row'>
+                                        <dt class='col-sm-3'>Created on</dt>
+                                        <dd class='col-sm-9'>{{ticket.created_at}}</dd>
+                                        <dt class='col-sm-3'>Criticality</dt>
+                                        <dd class='col-sm-9'><span class="badge bg-large {% if ticket.criticality == 'URGENT' %} bg-warning {% elif ticket.criticality == 'CRITICAL'%}bg-danger {% else %}bg-primary {% endif %}">{{ticket.criticality}}</span></dd>
+                                        {% for file in ticket.ticket_files.all %} {% if forloop.first %}
+                                        <dt class='col-sm-12'>Files</dt>
+                                        <dd class='col-sm-12'>
+                                            {% endif %}
+                                            <a href='/{{file.file}}'> {{file.file}} </a> {% if forloop.last %}
+                                        </dd>
+                                        {% endif %} {% endfor %}
+                                        <dt class='col-sm-3'>Status</dt>
+                                        <dd class='col-sm-9'><span class='badge bg-large bg-info'>{{ticket.current_status}}</span> Last modified on {{ticket.last_modified}} </dd>
+                                        <dt class='col-sm-12'><a class = 'btn btn-primary' href = '/ticket-detail/{{ticket.id}}/' style = 'width:100%;'>View Full Ticket</a></dt>
+                                    </dl>
+                                    <div class="card-footer card-comments" id = 'card-ticket-{{ticket.id}}'>
+                                        {% for comment in ticket.get_comments.all %}
+                                            {% if forloop.counter0 < 4 %}
+                                                <div class="card-comment card-comment-{{ticket.id}}">
+                                                    <!-- User image -->
+                                                    <img class="img-circle img-sm" src="{{user.image_location}}" alt="Image">
+
+                                                    <div class="comment-text">
+                                                        <span class="username">
+                                                            {{comment.comment_by.full_name}}
+                                                            <span class="text-muted float-right">{{comment.commented_at}}</span>
+                                                        </span>
+                                                        <!-- /.username -->
+                                                        {{comment.message}}
+                                                    </div>
+                                                    <!-- /.comment-text -->
+                                                </div>
+                                            {% elif forloop.counter0 == 4 %}
+                                                View full ticket to see Previous Comments
+                                            {% endif %}
+                                        {% endfor %}
+                                        <div class='card-footer'>
+                                            <form action="#" method="post">
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" class="form-control" placeholder='Write your comment here' id = 'comment-content-{{ticket.id}}'>
+                                                    <span class="input-group-append">
+                                                <button type="button" class="btn btn-info btn-flat add_comment" id = 'add_comment' data-ticket-id = '{{ticket.id}}' onclick = "send_data(ticket_id = {{ticket.id}})">Go!</button>
+                                                </span>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <!-- /.row -->
+                </div>
+                <!-- /.container-fluid -->
+            </section>
+            <!-- /.content -->
+
+            <a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" aria-label="Scroll to top">
+                <i class="fas fa-chevron-up"></i>
+            </a>
+        </div>
+        <!-- /.content-wrapper -->
+        {% include 'parts/footer.html' %}
+
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- jQuery -->
+    <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+    <!-- Bootstrap 4 -->
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- AdminLTE App -->
+    <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="{% static 'dist/js/demo.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            $(window).keydown(function(event) {
+                if ((event.keyCode == 13)) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        });
+        async function sendData(data){
+            let response = await fetch('/add-comment/', {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+        
+            if(response.status === 201){
+                document.getElementById('card-ticket-'+data['ticket_id']).innerHTML = append_comment(data['ticket_id'],data['comment']) + document.getElementById('card-ticket-'+data['ticket_id']).innerHTML
+            }else{
+                alert("Failed to add comment, Please contact your system admin!");
+                
+            }          
+        }
+        function send_data(ticket_id){
+            comment = document.getElementById("comment-content-" + ticket_id).value;
+            data = {ticket_id: ticket_id,comment:comment}
+            sendData(data);
+        }
+
+        function append_comment(ticket_id,comment){
+            return `<div class="card-comment card-comment-`+ ticket_id + `">
+                <img class="img-circle img-sm" src="` + '{{request.AppUser.image_location}}' +`" alt="User Image">
+                <div class="comment-text">
+                    <span class="username">
+                        {{request.AppUser.full_name}}
+                        <span class="text-muted float-right">{{comment.commented_at}}</span>
+                    </span>`+ comment +`
+                </div>
+            </div>`
+        }
+    </script>
+</body>
+
+</html>

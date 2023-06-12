@@ -1,0 +1,327 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard</title>
+
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+</head>
+
+<body class="hold-transition layout-top-nav layout-navbar-fixed">
+    <div class="wrapper">
+        {% include 'parts/header.html' %}
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Content Header (Page header) -->
+            <section class="content-header">
+                <div class="container-fluid">
+                    <div class="row mb-2">
+                        <div class="col-sm-6">
+                            <h1>Current Tickets</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <ol class="breadcrumb float-sm-right">
+                                <li class="breadcrumb-item"><a href="/home/">Home</a></li>
+                                <li class="breadcrumb-item active">Ticket</li>
+                                <li class="breadcrumb-item active"> {{ticket.id}}</li>
+                                
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.container-fluid -->
+            </section>
+
+            <!-- Main content -->
+            <section class="content">
+                <div class="container-fluid">
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12">
+                            <div class="card {% if ticket.criticality == 'URGENT' %} card-warning {% elif ticket.criticality == 'CRITICAL'%}card-danger {% else %}card-primary {% endif %} shadow-sm">
+                                <div class="card-header">
+                                    <h3 class="card-title">{{ticket.title}}</h3> <span style='margin-left:20px;'>Ticket Id #{{ticket.id}}</span>
+                                    <div class="card-tools">
+                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                                    </div>
+                                    <!-- /.card-tools -->
+                                </div>
+                                <!-- /.card-header -->
+                                <div class="card-body">
+                                    <dl class = 'row'>
+                                        <dl class = 'col-md-9'>
+                                            <dt>Description</dt>
+                                            <dd>{{ticket.description}}</dd>
+                                            <dt>Key People, Tool and Country</dt>
+                                            <dd><span class="badge bg-success" style='margin-right:5px;'>{{ticket.complaint_by}}</span><span class=" badge bg-success">{{ticket.currently_assigned}}</span></dd>
+                                            <dd><span class="badge bg-primary" style='margin-right:5px;'>{{ticket.country}}</span><span class=" badge bg-primary">{{ticket.tools}}</span></dd>
+                                        </dl>
+                                        <dl class = 'col-md-3'> 
+                                            <dd>
+                                                <button class = 'btn btn-primary' onclick ="resend_email(ticket_id = {{ticket.id}})" > Resend Email</button>
+                                            </dd>
+                                            {% if not ticket.is_archived %}
+                                            <dd>
+                                                <button class = 'btn btn-primary' onclick = "move_to_archive(ticket_id = {{ticket.id}},title = 'archive')"> Add to Archive </button>
+                                            </dd>
+                                            {% else %}
+                                            <dd>
+                                                <button class = 'btn btn-primary' onclick = "move_to_archive(ticket_id = {{ticket.id}},title = 'unarchive')"> Un Archive </button>
+                                            </dd>
+                                            {% endif %}
+                                        </dl>
+                                    </dl>
+                                    <dl class='row'>
+                                        <dt class='col-sm-3'>URL</dt>
+                                        <dd class='col-sm-9'>{{ticket.url}}
+                                            <dd>
+                                    </dl>
+                                    <dl class='row'>
+                                        <dt class='col-sm-3'>Created on</dt>
+                                        <dd class='col-sm-9'>{{ticket.created_at}}</dd>
+                                        <dt class='col-sm-3'>Criticality</dt>
+                                        <dd class='col-sm-9'><span class='badge bg-large bg-danger'>{{ticket.criticality}}</span></dd>
+                                        {% for file in ticket.ticket_files.all %} {% if forloop.first %}
+                                        <dt class='col-sm-12'>Files</dt>
+                                        <dd class='col-sm-12'>
+                                            {% endif %}
+                                            <a href='/{{file.file}}'> {{file.file}} </a> {% if forloop.last %}
+                                        </dd>
+                                        {% endif %} {% endfor %}
+                                        <dt class='col-sm-3'>Status</dt>
+                                        <dd class='col-sm-9'><span class='badge bg-large bg-danger'>{{ticket.current_status}}</span><a href = '#' id = 'change-status-btn' style = 'margin-left:10px;'>Change</a> Last modified on {{ticket.last_modified}} </dd>
+                                        <dt class = 'col-sm-12 change-status-section' style = 'display:none;'>
+                                            <div class="col-sm-6">
+                                                <div class="form-group">
+                                                    <label>Change status</label>
+                                                    <select class="form-control select2" id = 'status-dropdown' style="width: 100%;" name = 'status'>
+                                                        {% for obj in status_dropdown %}
+                                                            <option value = "{{obj.0}}" {% if ticket.current_status == obj.0 %}selected = 'selected'{% endif %}>{{obj.1}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class = 'col-sm-6'>
+                                                <div class = 'form-group '>
+                                                    <button class = 'btn btn-primary' onclick = "change_status(ticket_id = {{ticket.id}})">Save</button>
+                                                    <button class = 'btn btn-danger' id = 'change-status-cancle-btn'>Cancle</button>
+                                                </div>
+                                            </div>
+                                        </dt>
+                                
+                                        <dt class='col-sm-6'><button class = 'btn btn-primary' style = 'width:100%;' onclick="window.location.href='edit/'">Edit Ticket</button></dt>
+                                        <dt class='col-sm-6'><button class = 'btn btn-primary' style = 'width:100%;'>Mark as help desk</button></dt>
+                                    </dl>
+                                    {% include 'parts/history.html' %}
+                                    <h3>Comments</h3>
+                                    <div class="card-footer card-comments" id = 'card-ticket-{{ticket.id}}'>
+                                        {% for comment in ticket.get_comments.all %}
+                                        <div class="card-comment card-comment-{{ticket.id}}">
+                                            <!-- User image -->
+                                            <img class="img-circle img-sm" src="{{user.image_location}}" alt="User Image">
+
+                                            <div class="comment-text">
+                                                <span class="username">
+                                                    {{comment.comment_by.full_name}}
+                                                    <span class="text-muted float-right">{{comment.commented_at}}</span>
+                                                </span>
+                                                <!-- /.username -->
+                                                {{comment.message}}
+                                            </div>
+                                            <!-- /.comment-text -->
+                                        </div>
+                                        {% endfor %}
+                                        <div class='card-footer'>
+                                            <form action="#" method="post">
+                                                <div class="input-group input-group-sm">
+                                                    <input type="text" class="form-control" placeholder='Write your comment here' id = 'comment-content-{{ticket.id}}'>
+                                                    <span class="input-group-append">
+                                                <button type="button" class="btn btn-info btn-flat add_comment" id = 'add_comment' data-ticket-id = '{{ticket.id}}' onclick = "send_data(ticket_id = {{ticket.id}})">Go!</button>
+                                                </span>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+                            <!-- /.card -->
+                        </div>
+                    </div>
+                    <!-- /.row -->
+                </div>
+                <!-- /.container-fluid -->
+            </section>
+            <!-- /.content -->
+
+            <a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" aria-label="Scroll to top">
+                <i class="fas fa-chevron-up"></i>
+            </a>
+        </div>
+        <!-- /.content-wrapper -->
+        {%include 'parts/footer.html'%}
+    </div>
+    <!-- ./wrapper -->
+
+    <!-- jQuery -->
+    <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+    <!-- Bootstrap 4 -->
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- AdminLTE App -->
+    <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+    <!-- AdminLTE for demo purposes -->
+    <script src="{% static 'dist/js/demo.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            $(window).keydown(function(event) {
+                if ((event.keyCode == 13)) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        });
+        // add comment button call
+        async function sendData(data){
+            let response = await fetch('/add-comment/', {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+        
+            if(response.status === 201){
+                document.getElementById('card-ticket-'+data['ticket_id']).innerHTML = append_comment(data['ticket_id'],data['comment']) + document.getElementById('card-ticket-'+data['ticket_id']).innerHTML
+            }else{
+                alert("Failed to add comment, Please contact your system admin!");
+                
+            }          
+        }
+        function send_data(ticket_id){
+            comment = document.getElementById("comment-content-" + ticket_id).value;
+            data = {ticket_id: ticket_id,comment:comment}
+            sendData(data);
+        }
+        function append_comment(ticket_id,comment){
+            return `<div class="card-comment card-comment-`+ ticket_id + `">
+                <img class="img-circle img-sm" src="` + '{{request.AppUser.image_location}}' +`" alt="User Image">
+                <div class="comment-text">
+                    <span class="username">
+                        {{request.AppUser.full_name}}
+                        <span class="text-muted float-right">{{comment.commented_at}}</span>
+                    </span>`+ comment +`
+                </div>
+            </div>`
+        }
+        // Change status button call
+        async function changeStatus(data){
+            let response = await fetch('/change-status/', {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+        
+            if(response.status === 201){
+                location.reload();
+            }else{
+                alert("Failed to change status, Please contact your system admin!");
+                
+            }          
+        }
+        function change_status(ticket_id){
+            const x = document.getElementById('status-dropdown').value;
+            data = {ticket_id:ticket_id,status:x}
+            changeStatus(data)            
+        }
+
+        // Resend email call
+        async function resendEmailRequest(data){
+            let response = await fetch('/resend-email/', {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+        
+            if(response.status === 201){
+                alert('Email sent!')
+            }else{
+                alert("Failed to send Email, Please contact your system admin!");
+                
+            }          
+        }
+        function resend_email(ticket_id){
+            data = {ticket_id:ticket_id}
+            resendEmailRequest(data)            
+        }
+
+        // Add to archive call
+        async function changeArchive(data){
+            let response = await fetch('/add-to-archive/', {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+        
+            if(response.status === 201){
+                if (data['title']=='archive'){
+                    location.reload();
+                }
+                else{
+                    location.reload();
+                }
+            }else{
+                alert("Failed to change status, Please contact your system admin!");
+                
+            }          
+        }
+        function move_to_archive(ticket_id,title){
+            data = {ticket_id:ticket_id,title:title}
+            changeArchive(data)            
+        }
+
+        // Mark as help desk
+
+
+        $('#change-status-btn').click(function(){
+            
+            $('.change-status-section').toggle();
+            if(document.getElementById('change-status-btn').text == 'Change') {
+                document.getElementById('change-status-btn').text = 'Cancle';
+            }
+            else{
+                document.getElementById('change-status-btn').text = 'Change';
+            }
+        });
+        $('#change-status-cancle-btn').click(function(){
+            $('.change-status-section').toggle();
+            if(document.getElementById('change-status-btn').text == 'Change') {
+                document.getElementById('change-status-btn').text = 'Cancle';
+            }
+            else{
+                document.getElementById('change-status-btn').text = 'Change';
+            }
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,292 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | Advanced form elements</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+  <!-- daterange picker -->
+  <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+  <!-- iCheck for checkboxes and radio inputs -->
+  <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+  <!-- Bootstrap Color Picker -->
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css' %}">
+  <!-- Tempusdominus Bootstrap 4 -->
+  <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
+  <!-- Select2 -->
+  <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min.css' %}">
+  <link rel="stylesheet" href="{% static 'plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+  <!-- Bootstrap4 Duallistbox -->
+  <link rel="stylesheet" href="{% static 'plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css' %}">
+  <!-- BS Stepper -->
+  <link rel="stylesheet" href="{% static 'plugins/bs-stepper/css/bs-stepper.min.css' %}">
+  <!-- dropzonejs -->
+  <link rel="stylesheet" href="{% static 'plugins/dropzone/min/dropzone.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+</head>
+<body class="hold-transition layout-top-nav layout-navbar-fixed">
+<div class="wrapper">
+  {% include 'parts/header.html' %}
+   <div class="content-wrapper">
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <h3 style = 'padding:20px 0px 20px 0px'> Add New Ticket </h3>
+        <form method = "POST" enctype="multipart/form-data">
+            {% csrf_token %}
+        <!-- SELECT2 EXAMPLE -->
+        <div class="card card-default">
+          <div class="card-header">
+            <h3 class="card-title">ADD New Ticket</h3>
+
+            <div class="card-tools">
+              <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <!-- /.card-header -->
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Select Country <sup>*</sup></label>
+                  <select class="form-control select2" name = 'country' style="width: 100%;">
+                    {% for obj in country_dropdown %}
+                      <option value = "{{obj.0}}">{{obj.1}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Assign to <sup>*</sup></label>
+                  <select class="form-control select2" name = 'assign_to' style="width: 100%;">
+                    {% for obj in users %}
+                      <option value = "{{obj.user.email}}">{{obj.full_name}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                    <label for="exampleInputBorderWidth2"> Title<sup>*</sup></label>
+                    <input type="text" name = 'title' class="form-control form-control-border border-width-2" id="exampleInputBorderWidth2" placeholder="Title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="exampleInputBorderWidth2">Issue Type</code></label>
+                    <input type="text" name = 'issue_type' class="form-control form-control-border border-width-2" id="exampleInputBorderWidth2" placeholder="Issue Type">
+                </div>
+                <div class="form-group">
+                    <label class="col-form-label" for="inputSuccess"><i class="fas fa-check"></i> URL </label>
+                    <input type="text" name = 'url' class="form-control is-invalid" id="inputSuccess" placeholder="Enter URL">
+                </div>
+                <div class="form-group">
+                    <label>Created at</label>
+                      <div class="input-group date" id="reservationdatetime" data-target-input="nearest">
+                          <input type="text" class="form-control datetimepicker-input" data-target="#reservationdatetime" disabled/>
+                          <div class="input-group-append" data-target="#reservationdatetime" data-toggle="datetimepicker">
+                              <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              
+              <!-- /.col -->
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Select Tool <sup>*</sup></label>
+                  <select class="form-control select2" name = 'tool' style="width: 100%;">
+                    {% for obj in tool_dropdown %}
+                      <option value = "{{obj.0}}">{{obj.1}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="form-group">
+                    <label>Description <sup>*</sup></label>
+                    <textarea class="form-control form-control-border border-width-2" name = 'description' rows="6" placeholder="Enter Description..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Criticality<sup>*</sup></label>
+                    <select class="form-control select2" style="width: 100%;" name = 'urgency'>
+                      {% for obj in criticality_dropdown %}
+                        <option value = "{{obj.0}}">{{obj.1}}</option>
+                      {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="customFile">Relevent File</label>
+
+                    <div class="custom-file">
+                      <input type="file" class="custom-file-input" id="customFile" name = 'file' multiple>
+                      <label class="custom-file-label" for="customFile">Choose file</label>
+                    </div>
+                </div>
+                
+              </div>
+              <!-- /.col -->
+            </div>
+            <!-- /.row -->
+            <div class = "form-group text-center">
+                <button type = 'submit' class = 'btn btn-primary'>Submit</button>
+            </div>
+        </div>
+        <!-- /.card -->
+        </form>
+
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  {% include 'parts/footer.html' %}
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap 4 -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- Select2 -->
+<script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+<!-- Bootstrap4 Duallistbox -->
+<script src="{% static 'plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js' %}"></script>
+<!-- InputMask -->
+<script src="{% static 'plugins/moment/moment.min.js' %}"></script>
+<script src="{% static 'plugins/inputmask/jquery.inputmask.min.js' %}"></script>
+<!-- date-range-picker -->
+<script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
+<!-- bootstrap color picker -->
+<script src="{% static 'plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js' %}"></script>
+<!-- Tempusdominus Bootstrap 4 -->
+<script src="{% static 'plugins/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+<!-- Bootstrap Switch -->
+<script src="{% static 'plugins/bootstrap-switch/js/bootstrap-switch.min.js' %}"></script>
+<!-- BS-Stepper -->
+<script src="{% static 'plugins/bs-stepper/js/bs-stepper.min.js' %}"></script>
+<!-- dropzonejs -->
+<script src="{% static 'plugins/dropzone/min/dropzone.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{% static 'dist/js/demo.js' %}"></script>
+<!-- Page specific script -->
+
+<!-- bs-custom-file-input -->
+<script src="{% static 'plugins/bs-custom-file-input/bs-custom-file-input.min.js' %}"></script>
+<!-- bs-custom-file-input -->
+
+<script>
+  $(function () {
+    //Initialize Select2 Elements
+    $('.select2').select2()
+
+    //Initialize Select2 Elements
+    $('.select2bs4').select2({
+      theme: 'bootstrap4'
+    })
+
+    //Datemask dd/mm/yyyy
+    $('#datemask').inputmask('dd/mm/yyyy', { 'placeholder': 'dd/mm/yyyy' })
+    //Datemask2 mm/dd/yyyy
+    $('#datemask2').inputmask('mm/dd/yyyy', { 'placeholder': 'mm/dd/yyyy' })
+    //Money Euro
+    $('[data-mask]').inputmask()
+
+    //Date picker
+    $('#reservationdate').datetimepicker({
+        format: 'L'
+    });
+
+    //Date and time picker
+    $('#reservationdatetime').datetimepicker({ icons: { time: 'far fa-clock' } });
+
+    //Date range picker
+    $('#reservation').daterangepicker()
+    //Date range picker with time picker
+    $('#reservationtime').daterangepicker({
+      timePicker: true,
+      timePickerIncrement: 30,
+      locale: {
+        format: 'MM/DD/YYYY hh:mm A'
+      }
+    })
+    //Date range as a button
+    $('#daterange-btn').daterangepicker(
+      {
+        ranges   : {
+          'Today'       : [moment(), moment()],
+          'Yesterday'   : [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+          'Last 7 Days' : [moment().subtract(6, 'days'), moment()],
+          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+          'This Month'  : [moment().startOf('month'), moment().endOf('month')],
+          'Last Month'  : [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+        },
+        startDate: moment().subtract(29, 'days'),
+        endDate  : moment()
+      },
+      function (start, end) {
+        $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'))
+      }
+    )
+
+    //Timepicker
+    $('#timepicker').datetimepicker({
+      format: 'LT'
+    })
+
+    //Colorpicker
+    $('.my-colorpicker1').colorpicker()
+    //color picker with addon
+    $('.my-colorpicker2').colorpicker()
+
+    $('.my-colorpicker2').on('colorpickerChange', function(event) {
+      $('.my-colorpicker2 .fa-square').css('color', event.color.toString());
+    })
+
+    $("input[data-bootstrap-switch]").each(function(){
+      $(this).bootstrapSwitch('state', $(this).prop('checked'));
+    })
+
+  })
+ 
+
+  $(function () {
+    bsCustomFileInput.init();
+  });
+</script>
+<script>
+  // customer url validator
+  $('#inputSuccess').keypress(function(){
+    str = $('#inputSuccess').val();
+    regexp =  /^(?:(?:https?|ftp):\/\/)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{1,})))(?::\d{2,5})?(?:\/\S*)?$/;
+        if (regexp.test(str))
+        {
+          if ($('#inputSuccess').hasClass('is-invalid')){
+            $('#inputSuccess').addClass('is-valid').removeClass('is-invalid');
+          }
+        }
+        else{
+          if ($('#inputSuccess').hasClass('is-valid')){
+            $('#inputSuccess').removeClass('is-valid').addClass('is-invalid');
+          }
+        }
+  });
+</script>
+</body>
+</html>
